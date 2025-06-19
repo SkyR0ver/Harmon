@@ -4,7 +4,9 @@ from mmengine.config import read_base
 from src.datasets.collate_functions import collate_func_und, CollateConcat
 # from mmengine.dataset import DefaultSampler
 from src.datasets.samplers.multi_source_sampler import FixedBatchMultiSourceSampler
-from xtuner.dataset import LLaVADataset
+# from xtuner.dataset import LLaVADataset
+from src.datasets.understanding.llava_datasets import LLaVADataset
+
 from xtuner.dataset.map_fns import llava_map_fn, template_map_fn_factory
 from xtuner.dataset.utils import expand2square
 
