@@ -9,7 +9,7 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 with read_base():
     from .image2text import dataset as und_data
-    from .text2image import dataset as gen_data
+    from .text2image_o3 import dataset as gen_data
     from .processors import *   #
 
 
@@ -19,7 +19,7 @@ dataset = dict(
 )
 
 group_keys = ['image2text', 'text2image']
-repeat = [0, 4]
+repeat = [2, 2]
 batch_size = 48
 train_dataloader = dict(
     batch_size=batch_size,

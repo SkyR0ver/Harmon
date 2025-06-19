@@ -1,26 +1,27 @@
+from src.datasets.text2image.text2image import LargeText2ImageDataset, BlipO3Dataset
 from mmengine.config import read_base
-from xtuner.dataset import ConcatDataset
+from src.datasets.collate_functions import collate_func_gen, CollateConcat
 from src.datasets.samplers.multi_source_sampler import FixedBatchMultiSourceSampler
-from src.datasets.collate_functions import (collate_func_gen,
-                                            collate_func_und, CollateConcat)
-from PIL import ImageFile
-ImageFile.LOAD_TRUNCATED_IMAGES = True
-
 
 with read_base():
-    from .image2text import dataset as und_data
-    from .text2image import dataset as gen_data
-    from .processors import *   #
+    from .processors import prompt_template, tokenizer, image_size, pad_index
 
 
-dataset = dict(
-    type=ConcatDataset,
-    datasets=[und_data, gen_data]
-)
+max_length = 128
 
-group_keys = ['image2text', 'text2image']
-repeat = [0, 4]
-batch_size = 48
+
+dataset = dict(type=BlipO3Dataset,
+               local_folder=None,
+               unconditional=0.1,
+               prompt_template=prompt_template,
+               image_size=image_size,
+               tokenizer=tokenizer,
+               max_length=max_length)
+
+
+group_keys = ['text2image']
+repeat = [1,]
+batch_size = 32
 train_dataloader = dict(
     batch_size=batch_size,
     num_workers=4,
@@ -33,8 +34,9 @@ train_dataloader = dict(
                  batch_size=batch_size,    # fixed batch size for all sources
                  shuffle=True),
     collate_fn=dict(type=CollateConcat,
-                    collate_fns=[dict(type=collate_func_und,
-                                      pad_index=pad_index),
+                    collate_fns=[
+                                 # dict(type=collate_func_und,
+                                 #      pad_index=pad_index),
                                  dict(type=collate_func_gen,
                                       pad_index=pad_index),
                                  ],

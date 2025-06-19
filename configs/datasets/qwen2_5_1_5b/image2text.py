@@ -1,30 +1,45 @@
 from src.datasets.understanding.caption_datasets import CaptionDataset
+# from src.datasets.understanding.llava_datasets import LLaVADataset
 from mmengine.config import read_base
 from src.datasets.collate_functions import collate_func_und, CollateConcat
 # from mmengine.dataset import DefaultSampler
 from src.datasets.samplers.multi_source_sampler import FixedBatchMultiSourceSampler
-
-from xtuner.dataset.map_fns import template_map_fn_factory
-
+from xtuner.dataset import LLaVADataset
+from xtuner.dataset.map_fns import llava_map_fn, template_map_fn_factory
+from xtuner.dataset.utils import expand2square
 
 with read_base():
     from .processors import prompt_template, tokenizer, image_size, pad_index, image_length
 
 
-max_length = 512
 
+data_root = '/home/jixie/LLaVA-Instruct-150K/'
+data_path = '/home/jixie/LLaVA-Instruct-150K/llava_v1_5_mix665k.json'
+image_folder = '/home/jixie/Show-o/tuning_data'
+max_length = int(2048 - (336 / 14) ** 2)
 
-dataset = dict(type=CaptionDataset,
-               data_path='data/cc3m/cc3m_densecaps.json',
-               local_folder='data/cc3m/raw',
-               image_size=image_size,
-               ceph_folder=None,
-               ceph_config=None,
-               tokenizer=tokenizer,
-               template_map_fn=dict(
-                   type=template_map_fn_factory, template=prompt_template),
-               max_length=max_length,
-               image_length=image_length,)
+# dataset = dict(type=CaptionDataset,
+#                data_path='/home/jixie/LLaVA-Instruct-150K/llava_v1_5_mix665k.json',
+#                local_folder='/home/jixie/Show-o/tuning_data',
+#                image_size=image_size,
+#                ceph_folder=None,
+#                ceph_config=None,
+#                tokenizer=tokenizer,
+#                template_map_fn=dict(
+#                    type=template_map_fn_factory, template=prompt_template),
+#                max_length=max_length,
+#                image_length=image_length,)
+
+dataset = dict(
+    type=LLaVADataset,
+    data_path=data_path,
+    image_folder=image_folder,
+    tokenizer=tokenizer,
+    dataset_map_fn=llava_map_fn,
+    template_map_fn=dict(type=template_map_fn_factory, template=prompt_template),
+    max_length=max_length,
+    pad_image_to_square=False,
+)
 
 
 group_keys = ['image2text',]

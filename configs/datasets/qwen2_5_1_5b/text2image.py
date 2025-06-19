@@ -1,4 +1,4 @@
-from src.datasets.text2image.text2image import LargeText2ImageDataset
+from src.datasets.text2image.text2image import LargeText2ImageDataset, MidJourneyDataset
 from mmengine.config import read_base
 from src.datasets.collate_functions import collate_func_gen, CollateConcat
 from src.datasets.samplers.multi_source_sampler import FixedBatchMultiSourceSampler
@@ -10,15 +10,11 @@ with read_base():
 max_length = 128
 
 
-dataset = dict(type=LargeText2ImageDataset,
-               cap_folder='data/laion8m/laion6m_shortcaps',
-               data_path='data/laion8m/laion6m_shortcaps.json',
-               local_folder='data/laion8m/images',
+dataset = dict(type=MidJourneyDataset,
+               local_folder=None,
                unconditional=0.1,
                prompt_template=prompt_template,
                image_size=image_size,
-               ceph_folder=None,
-               ceph_config=None,
                tokenizer=tokenizer,
                max_length=max_length)
 
