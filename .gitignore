@@ -123,4 +123,11 @@ batchscript-*
 .idea/*.xml
 .idea/
 *.pdf
-checkpoints/
+checkpoints
+
+metric
+eval_res
+data
+dataset
+output
+plots

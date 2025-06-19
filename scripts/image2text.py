@@ -1,3 +1,4 @@
+from griffe import check
 import numpy as np
 import torch
 from PIL import Image
@@ -5,7 +6,7 @@ from mmengine.config import Config
 from src.builder import BUILDER
 from einops import rearrange
 import argparse
-
+from xtuner.model.utils import guess_load_checkpoint
 
 def expand2square(pil_img, background_color):
     width, height = pil_img.size
@@ -28,6 +29,8 @@ if __name__ == '__main__':
     parser.add_argument("--image", type=str, default="data/view.jpg")
     parser.add_argument("--image_size", type=int, default=512)
     parser.add_argument("--prompt", type=str, default="Describe the image in detail.")
+    parser.add_argument("--output", type=str, default="output.txt",
+                        help="Output file to save the generated text.")
     args = parser.parse_args()
 
     config = Config.fromfile(args.config)
@@ -35,7 +38,8 @@ if __name__ == '__main__':
     model = model.to(model.dtype)
     if args.checkpoint is not None:
         print(f"Load checkpoint: {args.checkpoint}", flush=True)
-        checkpoint = torch.load(args.checkpoint)
+        # checkpoint = torch.load(args.checkpoint)
+        checkpoint = guess_load_checkpoint(args.checkpoint)
         info = model.load_state_dict(checkpoint, strict=False)
 
     special_tokens_dict = {'additional_special_tokens': ["<image>", ]}
@@ -77,4 +81,8 @@ if __name__ == '__main__':
                                     if model.tokenizer.pad_token_id is not None else
                                     model.tokenizer.eos_token_id
                                     )
-    print(model.tokenizer.decode(output[0]))
+    caption = model.tokenizer.decode(output[0], skip_special_tokens=True)
+    print(caption)
+    with open(args.output, 'w') as f:
+        f.write(caption + '\n')
+    print(f"Output saved to {args.output}")
